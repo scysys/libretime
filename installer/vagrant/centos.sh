@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Additional Repos
 yum install -y epel-release
@@ -9,15 +9,15 @@ dnf config-manager --enable powertools
 
 # xiph multimedia (for icecast)
 curl -o /etc/yum.repos.d/multimedia:xiph.repo \
-    https://download.opensuse.org/repositories/multimedia:/xiph/CentOS_8/multimedia:xiph.repo
+  https://download.opensuse.org/repositories/multimedia:/xiph/CentOS_8/multimedia:xiph.repo
 
 # RaBe Liquidsoap Distribution (RaBe LSD)
 curl -o /etc/yum.repos.d/home:radiorabe:liquidsoap.repo \
-    https://download.opensuse.org/repositories/home:/radiorabe:/liquidsoap/CentOS_8/home:radiorabe:liquidsoap.repo
+  https://download.opensuse.org/repositories/home:/radiorabe:/liquidsoap/CentOS_8/home:radiorabe:liquidsoap.repo
 
 # RaBe Audio Packages for Enterprise Linux (RaBe APEL)
 curl -o /etc/yum.repos.d/home:radiorabe:audio.repo \
-    https://download.opensuse.org/repositories/home:/radiorabe:/audio/CentOS_8/home:radiorabe:audio.repo
+  https://download.opensuse.org/repositories/home:/radiorabe:/audio/CentOS_8/home:radiorabe:audio.repo
 
 # Update all the things (just to be sure we are on latest)
 yum update -y
@@ -31,7 +31,7 @@ patch -f /var/lib/pgsql/data/pg_hba.conf << EOD
 --- pg_hba.conf.orig	2020-12-19 13:10:46.828960307 +0000
 +++ pg_hba.conf	2020-12-19 13:11:37.356290128 +0000
 @@ -78,10 +78,11 @@
- 
+
  # "local" is for Unix domain socket connections only
  local   all             all                                     peer
 +local   all             all                                     md5
@@ -57,7 +57,6 @@ su -l postgres bash -c 'createdb -O airtime airtime'
 
 echo "ALTER USER airtime WITH PASSWORD 'airtime';" | su -l postgres bash -c psql
 echo "GRANT ALL PRIVILEGES ON DATABASE airtime TO airtime;" | su -l postgres bash -c psql
-
 
 # RabbitMQ
 curl -s https://packagecloud.io/install/repositories/rabbitmq/rabbitmq-server/script.rpm.sh | sudo bash
@@ -126,12 +125,12 @@ setsebool -P git_system_use_nfs 1 # same for git
 
 semanage port -a -t http_port_t -p tcp 9080 # default vagrant web port
 
-# Allow apache full access to /vagrant and /etc/airtime
+# Allow apache full access to /vagrant and /etc/libretime
 semanage fcontext -a -t httpd_sys_rw_content_t "/vagrant(/.*)?"
-semanage fcontext -a -t httpd_sys_rw_content_t "/etc/airtime(/.*)?"
+semanage fcontext -a -t httpd_sys_rw_content_t "/etc/libretime(/.*)?"
 semanage fcontext -a -t httpd_sys_rw_content_t "/srv/airtime(/.*)?"
 
-restorecon -Rv /vagrant /etc/airtime /srv/airtime
+restorecon -Rv /vagrant /etc/libretime /srv/airtime
 
 # Disable default apache page
 sed -i -e 's/^/#/' /etc/httpd/conf.d/welcome.conf
@@ -142,9 +141,8 @@ sed -i \
   -e 's/LoadModule mpm_event_module/#LoadModule mpm_event_module/' \
   /etc/httpd/conf.modules.d/00-mpm.conf
 
-
 # celery will not run unless we install a specific version (https://github.com/pypa/setuptools/issues/942)
-# this will need to be figured out later on and will get overriden by the docs installer anyhow :(
+# this will need to be figured out later on and will get overridden by the docs installer anyhow :(
 pip3 install setuptools==33.1.1
 pip3 freeze setuptools==33.1.1
 
@@ -153,7 +151,7 @@ echo 'date.timezone=Europe/Zurich' >> /etc/php.d/timezone.ini
 systemctl restart httpd
 
 # icecast needs to be available to everyone
-sed -i -e 's@<bind-address>127.0.0.1</bind-address>@<bind-address>0.0.0.0</bind-address>@' /etc/icecast.xml 
+sed -i -e 's@<bind-address>127.0.0.1</bind-address>@<bind-address>0.0.0.0</bind-address>@' /etc/icecast.xml
 systemctl enable --now icecast
 
 # let em use alsa

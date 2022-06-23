@@ -1,0 +1,24 @@
+[Unit]
+Description=LibreTime API Service
+PartOf=libretime.target
+
+[Service]
+Type=notify
+KillMode=mixed
+PrivateTmp=true
+
+Environment=LIBRETIME_LOG_FILEPATH=@@LOG_DIR@@/api.log
+Environment=LIBRETIME_CONFIG_FILEPATH=@@CONFIG_FILEPATH@@
+
+ExecStart=/usr/bin/gunicorn \
+        --workers 4 \
+        --log-file - \
+        --bind 127.0.0.1:8081 \
+        libretime_api.wsgi
+ExecReload=/bin/kill -s HUP $MAINPID
+User=libretime-api
+Group=libretime-api
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
